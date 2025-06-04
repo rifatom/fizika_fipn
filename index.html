@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fizika Kviz - 200 pitanja</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Fizika Kviz</h1>
+    <div id="quiz-container">
+      <div id="question-number"></div>
+      <div id="question-text"></div>
+      <div id="answers"></div>
+      <button id="next-btn" disabled>Sljedeće pitanje</button>
+    </div>
+    <div id="result" style="display:none;">
+      <h2>Rezultati kviza</h2>
+      <p id="score-text"></p>
+      <canvas id="chart" width="400" height="200"></canvas>
+      <button id="restart-btn">Ponovo pokreni kviz</button>
+    </div>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
