@@ -1,28 +1,2450 @@
 <!DOCTYPE html>
-<html lang="bs">
+<html lang="sr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fizika Kviz - 200 pitanja</title>
-<link rel="stylesheet" href="style.css" />
+<title>FIZIKA - priprema za ispit</title>
+<style>
+  body {
+    font-family: 'Calibri', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-align: center;
+  }
+  #top-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: #fff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 30px;
+    gap: 20px;
+  }
+  #sidebar {
+    flex: 1 1 220px;
+    min-width: 220px;
+    font-size: 1.1em;
+    color: #34495e;
+  }
+  #sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+  #quiz-container {
+    background: #fff;
+    max-width: 600px;
+    width: 100%;
+    border-radius: 8px;
+    padding: 25px 30px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  #question {
+    font-size: 1.4em;
+    margin-bottom: 20px;
+    color: #34495e;
+    min-height: 60px;
+  }
+  #answers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .answer {
+    padding: 12px 20px;
+    font-size: 1.1em;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  .answer:hover:not(:disabled) {
+    background-color: #2980b9;
+  }
+  .answer:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+  #feedback {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+  .correct {
+    color: green;
+  }
+  .incorrect {
+    color: red;
+  }
+  #next-btn {
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    background-color: #27ae60;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  #next-btn:disabled {
+    background-color: #95a5a6;
+    cursor: default;
+  }
+
+  /* Responsive za manje ekrane */
+  @media (max-width: 640px) {
+    #top-bar {
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    #sidebar {
+      min-width: auto;
+      width: 100%;
+      text-align: center;
+    }
+    #quiz-container {
+      padding: 20px;
+    }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Fizika Kviz</h1>
-    <div id="quiz-container">
-      <div id="question-number"></div>
-      <div id="question-text"></div>
-      <div id="answers"></div>
-      <button id="next-btn" disabled>Sljedeće pitanje</button>
-    </div>
-    <div id="result" style="display:none;">
-      <h2>Rezultati kviza</h2>
-      <p id="score-text"></p>
-      <canvas id="chart" width="400" height="200"></canvas>
-      <button id="restart-btn">Ponovo pokreni kviz</button>
-    </div>
+
+<h1>FIZIKA - priprema za ispit</h1>
+
+<div id="top-bar">
+  <div id="sidebar">
+    <h3>Rezultat</h3>
+    <p>Test: <span id="current-test">1</span> / 10</p>
+    <p>Trenutno pitanje: <span id="current-question">1</span> / 20</p>
+    <p>Tačni odgovori: <span id="correct-count">0</span></p>
+    <p>Netačni odgovori: <span id="incorrect-count">0</span></p>
   </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="script.js"></script>
+</div>
+
+<div id="quiz-container">
+  <h2 id="question"></h2>
+  <div id="answers"></div>
+  <button id="next-btn" disabled>Dalje</button>
+  <p id="feedback"></p>
+</div>
+
+<script>
+// Primer pitanja (dodaj stvarnih 200 pitanja po potrebi)
+const pitanja = [
+  {
+    "id": 1,
+    "pitanje": "Tijelo se kreće pravolinijski sa konstantnim ubrzanjem. Koja jednačina opisuje njegov položaj u vremenu t?",
+    "odgovori": [
+      "s = v₀ t + ½ a t²",
+      "s = v t",
+      "s = a t",
+      "s = v₀ t"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 2,
+    "pitanje": "Treći Newtonov zakon kaže da:",
+    "odgovori": [
+      "Za svaku akciju postoji jednaka i suprotna reakcija",
+      "Tijelo ostaje u stanju mirovanja ili ravnomjernog kretanja",
+      "F = ma",
+      "Sila je jednaka masi puta ubrzanje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 3,
+    "pitanje": "Moment sile se definiše kao:",
+    "odgovori": [
+      "Sila pomnožena sa krakom sile",
+      "Masa puta ubrzanje",
+      "Sila podeljena sa ubrzanjem",
+      "Sila pomnožena sa brzinom"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 4,
+    "pitanje": "Kod elastičnog sudara, ukupna kinetička energija:",
+    "odgovori": [
+      "Ostaje nepromenjena",
+      "Se smanjuje",
+      "Se povećava",
+      "Postaje nula"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 5,
+    "pitanje": "Koja veličina se ne mijenja pri sudaru u izolovanom sistemu?",
+    "odgovori": [
+      "Ukupni impuls",
+      "Ukupna masa",
+      "Brzina jednog tijela",
+      "Energija gibanja"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 6,
+    "pitanje": "Pritisak na dnu zatvorene posude sa tečnošću je:",
+    "odgovori": [
+      "p = ρ g h",
+      "p = m g",
+      "p = F / A",
+      "p = ρ v² / 2"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 7,
+    "pitanje": "Bernulijeva jednačina ne uključuje:",
+    "odgovori": [
+      "Energiju (kinetičku i potencijalnu) i pritisak",
+      "Brzinu fluida",
+      "Visinu fluida",
+      "Temperaturu fluida"
+    ],
+    "tacan": 3
+  },
+  {
+    "id": 8,
+    "pitanje": "Prvi zakon termodinamike glasi:",
+    "odgovori": [
+      "Promjena unutrašnje energije je jednaka zbiru rada i toplote",
+      "Energija se ne može stvoriti ni uništiti",
+      "Entropija raste",
+      "Toplota teče sa hladnijeg na toplije tijelo"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 9,
+    "pitanje": "Idealni gas se sastoji od:",
+    "odgovori": [
+      "Čestica koje ne međudeluju međusobno",
+      "Molekula koji su u stalnom dodiru",
+      "Tečnosti i gasova",
+      "Čvrstih čestica"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 10,
+    "pitanje": "Atomska masa ugljenika je približno:",
+    "odgovori": [
+      "12 u",
+      "14 u",
+      "1 u",
+      "6 u"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 11,
+    "pitanje": "Radioaktivni alfa raspad emituje:",
+    "odgovori": [
+      "Jezgro helijuma",
+      "Elektron",
+      "Neutron",
+      "Pozitron"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 12,
+    "pitanje": "Period oscilacija klatna zavisi od:",
+    "odgovori": [
+      "Dužine klatna",
+      "Amplitude oscilacija",
+      "Masa klatna",
+      "Gravitacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 13,
+    "pitanje": "Talasi koji zahtijevaju sredinu za prostiranje nazivaju se:",
+    "odgovori": [
+      "Mehanički talasi",
+      "Elektromagnetni talasi",
+      "Svetlosni talasi",
+      "Radio talasi"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 14,
+    "pitanje": "Frekvencija zvuka određuje:",
+    "odgovori": [
+      "Visinu tona",
+      "Jačinu tona",
+      "Brzinu zvuka",
+      "Dužinu talasa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 15,
+    "pitanje": "Doplerov efekat se ogleda u:",
+    "odgovori": [
+      "Promjeni frekvencije talasa usljed relativnog kretanja izvora i posmatrača",
+      "Povećanju amplitude talasa",
+      "Smanjenju brzine talasa",
+      "Prelasku talasa u drugu sredinu"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 16,
+    "pitanje": "Defekt mase nastaje zbog:",
+    "odgovori": [
+      "Energije vezivanja koja smanjuje masu jezgra",
+      "Gubitka protona",
+      "Gubitka neutrona",
+      "Gubitka elektrona"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 17,
+    "pitanje": "U nuklearnoj fisiji, jezgro se:",
+    "odgovori": [
+      "Dijeli na dva ili više lakših jezgara",
+      "Spaja sa drugim jezgrom",
+      "Emituje elektrone",
+      "Postaje stabilno"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 18,
+    "pitanje": "Energija vezivanja po nukleonu je najviša za:",
+    "odgovori": [
+      "Jezgro gvožđa",
+      "Jezgro uranijuma",
+      "Jezgro vodonika",
+      "Jezgro helijuma"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 19,
+    "pitanje": "Kod prostih harmonijskih oscilacija, maksimalna kinetička energija se javlja kada je:",
+    "odgovori": [
+      "Pomjeraj iz ravnotežnog položaja nula",
+      "Pomjeraj maksimalan",
+      "Brzina nula",
+      "Sila maksimalna"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 20,
+    "pitanje": "Brzina talasa zavisi od:",
+    "odgovori": [
+      "Sredine kroz koju talas prolazi",
+      "Amplitude talasa",
+      "Frekvencije talasa",
+      "Dužine talasa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 21,
+    "pitanje": "Šta opisuje vektor brzine kod kretanja tijela?",
+    "odgovori": [
+      "Smjer i veličinu brzine",
+      "Samo veličinu brzine",
+      "Samo smjer kretanja",
+      "Ubrzanje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 22,
+    "pitanje": "Koji od navedenih zakona pripada Newtonovim zakonima kretanja?",
+    "odgovori": [
+      "F = ma",
+      "pV = nRT",
+      "E = mc²",
+      "W = Fd"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 23,
+    "pitanje": "Šta je ugaona brzina u rotacionom kretanju?",
+    "odgovori": [
+      "Ugaoni pomjeraj po jedinici vremena",
+      "Linearni pomak",
+      "Kinetička energija rotacije",
+      "Moment sile"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 24,
+    "pitanje": "Koja je osnovna osobina elastičnog sudara?",
+    "odgovori": [
+      "Očuvanje kinetičke energije i impulsa",
+      "Deformacija tijela nakon sudara",
+      "Gubitak energije",
+      "Promjena mase tijela"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 25,
+    "pitanje": "Koji zakon opisuje pritisak u tečnosti u mirovanju?",
+    "odgovori": [
+      "Pascalov zakon",
+      "Bernulijev zakon",
+      "Newtonov zakon",
+      "Zakoni termodinamike"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 26,
+    "pitanje": "Koja je osnovna formula Bernulijeve jednačine?",
+    "odgovori": [
+      "p + ½ ρ v² + ρ g h = konstanta",
+      "pV = nRT",
+      "F = ma",
+      "E = hf"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 27,
+    "pitanje": "Kako glasi Boyle-Mariottov zakon za gasove?",
+    "odgovori": [
+      "Pri stalnoj temperaturi pV = konstanta",
+      "Pri stalnom pritisku V/T = konstanta",
+      "Pri stalnom volumenu p/T = konstanta",
+      "pV/T = konstanta"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 28,
+    "pitanje": "Koji je osnovni princip termodinamike?",
+    "odgovori": [
+      "Energija se ne stvara ni uništava, samo prenosi",
+      "Toplota uvijek prelazi sa hladnog na toplo tijelo",
+      "Entropija se smanjuje",
+      "Masa se pretvara u energiju"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 29,
+    "pitanje": "Šta je struktura supstance?",
+    "odgovori": [
+      "Način rasporeda čestica u materiji",
+      "Masa supstance",
+      "Zapremina supstance",
+      "Temperatura supstance"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 30,
+    "pitanje": "Koja je osnovna čestica koja učestvuje u radioaktivnom beta-raspadu?",
+    "odgovori": [
+      "Elektron ili pozitron",
+      "Proton",
+      "Neutron",
+      "Alfa čestica"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 31,
+    "pitanje": "Koji je jedinični naziv za masu atoma?",
+    "odgovori": [
+      "Jedinica atomske mase (u)",
+      "Kilogram (kg)",
+      "Gram (g)",
+      "Molarna masa (mol)"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 32,
+    "pitanje": "Koji od sljedećih procesa je nuklearna fuzija?",
+    "odgovori": [
+      "Spajanje lakih jezgara u teže",
+      "Raspad teškog jezgra na dva lakša",
+      "Emisija alfa čestice",
+      "Beta raspad"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 33,
+    "pitanje": "Koji parametar određuje frekvenciju oscilacija klatna?",
+    "odgovori": [
+      "Dužina klatna i gravitaciono ubrzanje",
+      "Masa klatna",
+      "Temperatura okoline",
+      "Amplituda oscilacija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 34,
+    "pitanje": "Kako se zove pomjeranje talasa kada prelazi iz jedne sredine u drugu?",
+    "odgovori": [
+      "Refrakcija",
+      "Refleksija",
+      "Difrakcija",
+      "Interferencija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 35,
+    "pitanje": "Koja veličina opisuje količinu kretanja tijela?",
+    "odgovori": [
+      "Impuls",
+      "Rad",
+      "Snaga",
+      "Energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 36,
+    "pitanje": "Koja je formula za kinetičku energiju tijela?",
+    "odgovori": [
+      "Ek = ½ m v²",
+      "Ep = m g h",
+      "E = m c²",
+      "W = F d"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 37,
+    "pitanje": "Kako se zove sila koja djeluje suprotno od smjera kretanja tijela po površini?",
+    "odgovori": [
+      "Sila trenja",
+      "Težina",
+      "Sila vuče",
+      "Normalna sila"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 38,
+    "pitanje": "Koja je osnovna razlika između gasova i tečnosti?",
+    "odgovori": [
+      "Gasovi nemaju stalni oblik, tečnosti imaju",
+      "Gasovi su nevidljivi, tečnosti vidljive",
+      "Gasovi imaju veću gustinu od tečnosti",
+      "Gasovi su hladniji od tečnosti"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 39,
+    "pitanje": "Koji od navedenih fenomena je primjer interferencije talasa?",
+    "odgovori": [
+      "Dva talasa se sabiraju i pojačavaju",
+      "Talasi se odbijaju od prepreke",
+      "Talasi prelaze u drugu sredinu",
+      "Talasi gube energiju"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 40,
+    "pitanje": "Koja je osnovna jedinica za količinu toplote u termodinamici?",
+    "odgovori": [
+      "Džul (J)",
+      "Watt (W)",
+      "Kelvin (K)",
+      "Amper (A)"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 41,
+    "pitanje": "Koja je osnovna formula za impuls sile?",
+    "odgovori": [
+      "I = F Δt",
+      "I = m v",
+      "I = m a",
+      "I = F / t"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 42,
+    "pitanje": "Šta opisuje pritisak u fluidu?",
+    "odgovori": [
+      "Silu po jedinici površine",
+      "Brzinu fluida",
+      "Zapreminu fluida",
+      "Temperaturu fluida"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 43,
+    "pitanje": "Kako se zove zakon koji kaže da je ukupni pritisak u fluidu jednak zbiru statičkog i dinamičkog pritiska?",
+    "odgovori": [
+      "Bernulijev zakon",
+      "Pascalov zakon",
+      "Archimedesov zakon",
+      "Boyle-Mariottov zakon"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 44,
+    "pitanje": "Koja je osnovna jedinica za energiju u SI sistemu?",
+    "odgovori": [
+      "Džul (J)",
+      "Vat (W)",
+      "Newton (N)",
+      "Kulon (C)"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 45,
+    "pitanje": "Koji gasni zakon povezuje pritisak i volumen pri konstantnoj temperaturi?",
+    "odgovori": [
+      "Boyle-Mariottov zakon",
+      "Gay-Lussacov zakon",
+      "Charlesov zakon",
+      "Avogadrov zakon"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 46,
+    "pitanje": "Koji parametar utiče na brzinu zvuka u gasu?",
+    "odgovori": [
+      "Temperatura",
+      "Pritisak",
+      "Zapremina",
+      "Masa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 47,
+    "pitanje": "Kako se zove proces kod kojeg se gas širi bez razmjene toplote sa okolinom?",
+    "odgovori": [
+      "Adijabatski proces",
+      "Izotermni proces",
+      "Izobarni proces",
+      "Izohorni proces"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 48,
+    "pitanje": "Šta je unutrašnja energija sistema?",
+    "odgovori": [
+      "Ukupna kinetička i potencijalna energija svih čestica u sistemu",
+      "Energija kretanja sistema",
+      "Spoljašnja energija",
+      "Energija toplote u sistemu"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 49,
+    "pitanje": "Koji je osnovni zakon očuvanja u izolovanom sistemu?",
+    "odgovori": [
+      "Očuvanje energije",
+      "Očuvanje mase",
+      "Očuvanje zapremine",
+      "Očuvanje temperature"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 50,
+    "pitanje": "Koja čestica se emituje u beta-minus radioaktivnom raspadu?",
+    "odgovori": [
+      "Elektron",
+      "Pozitron",
+      "Alfa čestica",
+      "Neutron"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 51,
+    "pitanje": "Koja veličina predstavlja mjeru nereda u sistemu u termodinamici?",
+    "odgovori": [
+      "Entropija",
+      "Temperatura",
+      "Unutrašnja energija",
+      "Rad"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 52,
+    "pitanje": "Koji od navedenih procesa je egzoterman?",
+    "odgovori": [
+      "Fuzija",
+      "Isparavanje",
+      "Topljenje",
+      "Ponavljanje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 53,
+    "pitanje": "Šta je rezonanca u oscilatornim sistemima?",
+    "odgovori": [
+      "Pojava velikih oscilacija kada frekvencija spoljnog djelovanja odgovara prirodnoj frekvenciji sistema",
+      "Gubitak energije tokom oscilacija",
+      "Smanjenje amplitude sa vremenom",
+      "Potpuno prigušivanje oscilacija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 54,
+    "pitanje": "Koja je osnovna jedinica za frekvenciju u SI sistemu?",
+    "odgovori": [
+      "Herc (Hz)",
+      "Sekunda (s)",
+      "Metar (m)",
+      "Džul (J)"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 55,
+    "pitanje": "Šta predstavlja amplituda talasa?",
+    "odgovori": [
+      "Maksimalno odstupanje od ravnotežnog položaja",
+      "Broj oscilacija u sekundi",
+      "Brzinu prostiranja talasa",
+      "Dužinu talasa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 56,
+    "pitanje": "Koja je osnovna razlika između longitudinalnih i transverzalnih talasa?",
+    "odgovori": [
+      "Pravac oscilacije čestica je paralelan pravcu prostiranja kod longitudinalnih, a okomit kod transverzalnih talasa",
+      "Brzina talasa",
+      "Frekvencija talasa",
+      "Amplituda talasa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 57,
+    "pitanje": "Koji zakon se koristi za računanje raspada radioaktivnih supstanci?",
+    "odgovori": [
+      "Zakon eksponencijalnog raspada",
+      "Boyle-Mariottov zakon",
+      "Pascalov zakon",
+      "Newtonov zakon"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 58,
+    "pitanje": "Koji parametar određuje brzinu raspada radioaktivnog materijala?",
+    "odgovori": [
+      "Vrijeme poluraspada",
+      "Masa materijala",
+      "Temperatura okoline",
+      "Zapremina materijala"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 59,
+    "pitanje": "Koji je primarni izvor energije u nuklearnoj fuziji?",
+    "odgovori": [
+      "Spajanje lakih jezgara u teža jezgra",
+      "Raspad teških jezgara",
+      "Emisija beta čestica",
+      "Elektronski prelazi"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 60,
+    "pitanje": "Koji je osnovni princip rada nuklearne fisije?",
+    "odgovori": [
+      "Cijepanje teškog jezgra na dva ili više lakših sa oslobađanjem energije",
+      "Spajanje lakih jezgara u teže",
+      "Povećanje mase jezgra",
+      "Apsorpcija neutrona bez reakcije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 61,
+    "pitanje": "Kako se definiše ugaona brzina rotacionog kretanja?",
+    "odgovori": [
+      "Promjena ugla po jedinici vremena",
+      "Ukupni ugao rotacije",
+      "Brzina kretanja tačke na obodu",
+      "Radijus kružne putanje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 62,
+    "pitanje": "Koji je matematički zapis drugog Newtonovog zakona?",
+    "odgovori": [
+      "F = m a",
+      "F = m v",
+      "F = m / a",
+      "F = a / m"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 63,
+    "pitanje": "Koji pojam opisuje količinu kretanja tijela?",
+    "odgovori": [
+      "Impuls",
+      "Energija",
+      "Snaga",
+      "Rad"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 64,
+    "pitanje": "Šta se dešava sa kinetičkom energijom tijela u elastičnom sudaru?",
+    "odgovori": [
+      "Ukupna kinetička energija se očuva",
+      "Kinetička energija se povećava",
+      "Kinetička energija se smanjuje",
+      "Kinetička energija se pretvara u toplotu"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 65,
+    "pitanje": "Koja sila djeluje na tijelo koje se kreće kružnom putanjom i usmjerena je ka centru kružnice?",
+    "odgovori": [
+      "Centripetalna sila",
+      "Centrifugalna sila",
+      "Težina",
+      "Trenje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 66,
+    "pitanje": "Koja je formula za rad sile?",
+    "odgovori": [
+      "W = F d cosθ",
+      "W = F / d",
+      "W = F + d",
+      "W = F d sinθ"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 67,
+    "pitanje": "Šta opisuje zakon očuvanja impulsa?",
+    "odgovori": [
+      "Ukupni impuls sistema ostaje konstantan ako je sistem izolovan",
+      "Impuls tijela se stalno mijenja",
+      "Ukupni impuls se povećava",
+      "Impuls se pretvara u energiju"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 68,
+    "pitanje": "Kako se naziva sila koja se suprotstavlja pokretu tijela po površini drugog tijela?",
+    "odgovori": [
+      "Sila trenja",
+      "Težina",
+      "Normalna sila",
+      "Centripetalna sila"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 69,
+    "pitanje": "Koja je osnova za Bernulijevu jednačinu u fluidima?",
+    "odgovori": [
+      "Princip očuvanja energije u fluidu",
+      "Zakon očuvanja mase",
+      "Zakon pritiska",
+      "Zakon gravitacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 70,
+    "pitanje": "Kako se zove sila koja deluje na tijelo uronjeno u tečnost i suprotna je težini?",
+    "odgovori": [
+      "Uzgon (potisak)",
+      "Trenje",
+      "Normalna sila",
+      "Težina"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 71,
+    "pitanje": "Koja je osnovna razlika između izotermnog i adijabatskog procesa?",
+    "odgovori": [
+      "Izotermni proces se odvija pri konstantnoj temperaturi, adijabatski bez razmjene toplote",
+      "Izotermni proces se odvija bez promjene pritiska",
+      "Adijabatski proces je pri konstantnom pritisku",
+      "Izotermni proces je brz, a adijabatski spor"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 72,
+    "pitanje": "Kako se definiše toplota u termodinamici?",
+    "odgovori": [
+      "Energija koja se prenosi zbog temperaturne razlike",
+      "Unutrašnja energija sistema",
+      "Rad koji obavlja sistem",
+      "Temperatura sistema"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 73,
+    "pitanje": "Koji tip talasa zahtijeva medijum za prostiranje?",
+    "odgovori": [
+      "Mehanički talasi",
+      "Elektromagnetski talasi",
+      "Svjetlosni talasi",
+      "Radio talasi"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 74,
+    "pitanje": "Šta je defekt mase u nuklearnoj fizici?",
+    "odgovori": [
+      "Razlika između mase jezgra i zbirne mase protona i neutrona",
+      "Masa jednog protona",
+      "Masa cijelog atoma",
+      "Masa elektrona"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 75,
+    "pitanje": "Koji je osnovni princip rada nuklearnog reaktora?",
+    "odgovori": [
+      "Kontrolisana lančana reakcija fisije",
+      "Spajanje lakih jezgara",
+      "Raspad alfa čestica",
+      "Proizvodnja beta čestica"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 76,
+    "pitanje": "Šta se dešava sa energijom tokom nuklearne fisije?",
+    "odgovori": [
+      "Oslobađa se velika količina energije",
+      "Troši se energija",
+      "Ne mijenja se energija",
+      "Energija se pretvara u masu"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 77,
+    "pitanje": "Koji zakon povezuje silu trenja i normalnu silu?",
+    "odgovori": [
+      "Zakon trenja: F_t = μ N",
+      "Newtonov prvi zakon",
+      "Bernulijev zakon",
+      "Zakon očuvanja energije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 78,
+    "pitanje": "Šta opisuje termodinamički prvi zakon?",
+    "odgovori": [
+      "Promjenu unutrašnje energije sistema je jednaka zbiru primljene toplote i rada izvršenog nad sistemom",
+      "Temperaturu sistema",
+      "Rad sistema",
+      "Entropiju sistema"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 79,
+    "pitanje": "Šta je period oscilacije?",
+    "odgovori": [
+      "Vrijeme za jedan puni ciklus oscilacije",
+      "Broj oscilacija u sekundi",
+      "Amplitude oscilacije",
+      "Frekvencija oscilacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 80,
+    "pitanje": "Koji je odnos između frekvencije (f) i perioda (T) oscilacija?",
+    "odgovori": [
+      "f = 1 / T",
+      "f = T",
+      "f = T²",
+      "f = 2π T"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 81,
+    "pitanje": "Koja je formula za brzinu u pravolinijskom kretanju sa konstantnim ubrzanjem?",
+    "odgovori": [
+      "v = v0 + a t",
+      "v = a / t",
+      "v = v0 - a t",
+      "v = a t^2"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 82,
+    "pitanje": "Šta je normalna sila?",
+    "odgovori": [
+      "Sila koja djeluje okomito na površinu",
+      "Sila koja djeluje paralelno površini",
+      "Težina tijela",
+      "Trenje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 83,
+    "pitanje": "Kako se naziva sila koja prouzrokuje ubrzanje tijela?",
+    "odgovori": [
+      "Rezultantna sila",
+      "Težina",
+      "Normalna sila",
+      "Trenje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 84,
+    "pitanje": "Koja je osnovna formula za kinetičku energiju?",
+    "odgovori": [
+      "E_k = ½ m v²",
+      "E_k = m g h",
+      "E_k = m v",
+      "E_k = F d"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 85,
+    "pitanje": "Šta je moment inercije?",
+    "odgovori": [
+      "Mjera otpornosti tijela na promjenu ugaone brzine",
+      "Ukupna masa tijela",
+      "Ukupna energija tijela",
+      "Sila potrebna za pokretanje tijela"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 86,
+    "pitanje": "Kako se definiše rad u fizici?",
+    "odgovori": [
+      "Proizvod sile i pomjeraja u smjeru sile",
+      "Sila koja djeluje na tijelo",
+      "Promjena kinetičke energije",
+      "Ukupna energija sistema"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 87,
+    "pitanje": "Koji su uslovi za elastični sudar?",
+    "odgovori": [
+      "Očuvanje kinetičke energije i impulsa",
+      "Samo očuvanje impulsa",
+      "Samo očuvanje energije",
+      "Nema očuvanja ni energije ni impulsa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 88,
+    "pitanje": "Koji zakon opisuje odnos između sile trenja i normalne sile?",
+    "odgovori": [
+      "F = μ N",
+      "F = m a",
+      "F = m g",
+      "F = k x"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 89,
+    "pitanje": "Kako se naziva sila koja djeluje na tijelo u pokretu kroz fluid i suprotna je njegovom kretanju?",
+    "odgovori": [
+      "Otpor fluida",
+      "Centripetalna sila",
+      "Težina",
+      "Sila trenja"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 90,
+    "pitanje": "Koja je osnovna jednačina Bernulijevog zakona?",
+    "odgovori": [
+      "p + ½ ρ v² + ρ g h = const.",
+      "p = F / A",
+      "F = m a",
+      "p V = n R T"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 91,
+    "pitanje": "Koja je osnovna jedinica pritiska u SI sistemu?",
+    "odgovori": [
+      "Paskal (Pa)",
+      "Bar",
+      "Atmosfera",
+      "Njutn"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 92,
+    "pitanje": "Šta je rad koji vrši gas tokom izotermnog procesa?",
+    "odgovori": [
+      "W = n R T ln(V2/V1)",
+      "W = P ΔV",
+      "W = m g h",
+      "W = F d"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 93,
+    "pitanje": "Koja je osnovna razlika između fuzije i fisije?",
+    "odgovori": [
+      "Fuzija spaja lake jezgre, fisija cijepa teške jezgre",
+      "Fuzija cijepa jezgre, fisija spaja",
+      "Oba su ista pojam",
+      "Ništa od navedenog"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 94,
+    "pitanje": "Koji gas se koristi kao gorivo u termonuklearnim reaktorima?",
+    "odgovori": [
+      "Izotopi vodonika (deuterijum i tricijum)",
+      "Ugljen-dioksid",
+      "Helijum",
+      "Azot"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 95,
+    "pitanje": "Šta je nuklearni defekt mase?",
+    "odgovori": [
+      "Razlika mase jezgra i sume masa protona i neutrona",
+      "Masa atoma",
+      "Masa elektrona",
+      "Masa nukleona"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 96,
+    "pitanje": "Šta je entropija u termodinamici?",
+    "odgovori": [
+      "Mjera nereda u sistemu",
+      "Unutrašnja energija",
+      "Toplota",
+      "Temperatura"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 97,
+    "pitanje": "Koji je zakon odgovoran za održavanje ukupne energije u izolovanom sistemu?",
+    "odgovori": [
+      "Prvi zakon termodinamike",
+      "Drugi zakon termodinamike",
+      "Treći zakon termodinamike",
+      "Zakon gravitacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 98,
+    "pitanje": "Kako se naziva fenomen kada se talasi odbijaju od prepreke?",
+    "odgovori": [
+      "Refleksija",
+      "Refrakcija",
+      "Difrakcija",
+      "Interferencija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 99,
+    "pitanje": "Koja je brzina zvuka u vazduhu na sobnoj temperaturi približno?",
+    "odgovori": [
+      "340 m/s",
+      "150 m/s",
+      "500 m/s",
+      "1000 m/s"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 100,
+    "pitanje": "Koja je jedinica za frekvenciju?",
+    "odgovori": [
+      "Herc (Hz)",
+      "Sekunda (s)",
+      "Metar (m)",
+      "Joul (J)"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 101,
+    "pitanje": "Šta opisuje Hookov zakon u mehanici?",
+    "odgovori": [
+      "Odnos sile i deformacije elastičnog tijela",
+      "Zakon očuvanja energije",
+      "Zakon gravitacije",
+      "Zakon očuvanja impulsa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 102,
+    "pitanje": "Kako se naziva sila koja vraća tijelo u početni položaj kod oscilacija?",
+    "odgovori": [
+      "Restuticona sila",
+      "Inercijalna sila",
+      "Težina",
+      "Trenje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 103,
+    "pitanje": "Koji je osnovni uslov za harmonične oscilacije?",
+    "odgovori": [
+      "Restituciona sila je proporcionalna pomjeraju i suprotna smjera",
+      "Konstantna brzina",
+      "Ubrzanje je nula",
+      "Velika masa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 104,
+    "pitanje": "Šta je amplituda oscilacija?",
+    "odgovori": [
+      "Maksimalno pomjeranje od ravnotežnog položaja",
+      "Broj oscilacija u sekundi",
+      "Period oscilacije",
+      "Ubrzanje tijela"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 105,
+    "pitanje": "Kako se naziva pojava kada se dvije talasne dužine međusobno dodaju ili oduzimaju?",
+    "odgovori": [
+      "Interferencija",
+      "Difrakcija",
+      "Refleksija",
+      "Apsorpcija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 106,
+    "pitanje": "Koji tip talasa može biti longitudinalan?",
+    "odgovori": [
+      "Zvuk u vazduhu",
+      "Svjetlost",
+      "Radio talas",
+      "Mikrotalasni talas"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 107,
+    "pitanje": "Šta predstavlja frekvencija talasa?",
+    "odgovori": [
+      "Broj oscilacija u jedinici vremena",
+      "Brzinu talasa",
+      "Dužinu talasa",
+      "Period oscilacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 108,
+    "pitanje": "Koja je osnovna formula za energiju fotona?",
+    "odgovori": [
+      "E = h f",
+      "E = m c^2",
+      "E = ½ m v^2",
+      "E = k T"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 109,
+    "pitanje": "Šta je nuklearna fisija?",
+    "odgovori": [
+      "Razdvajanje teške atomske jezgre na lakše jezgre",
+      "Spajanje lakih jezgri",
+      "Raspad beta čestice",
+      "Emisija alfa čestice"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 110,
+    "pitanje": "Koji je osnovni uslov za termonuklearnu fuziju?",
+    "odgovori": [
+      "Visoka temperatura i pritisak",
+      "Niska temperatura",
+      "Nizak pritisak",
+      "Pojava gravitacionih talasa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 111,
+    "pitanje": "Šta je period poluraspada radioaktivnog izotopa?",
+    "odgovori": [
+      "Vrijeme potrebno da se polovina uzorka raspadne",
+      "Vrijeme potrebno da se cijeli uzorak raspadne",
+      "Vrijeme trajanja emitovanog zračenja",
+      "Vrijeme između dva zračenja"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 112,
+    "pitanje": "Kako se naziva ukupna energija tijela u mehanici?",
+    "odgovori": [
+      "Mehanička energija",
+      "Unutrašnja energija",
+      "Toplotna energija",
+      "Potencijalna energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 113,
+    "pitanje": "Koja je formula za potencijalnu energiju tijela na visini h?",
+    "odgovori": [
+      "E_p = m g h",
+      "E_p = ½ m v²",
+      "E_p = F d",
+      "E_p = m c²"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 114,
+    "pitanje": "Šta se dešava sa zvukom kada pređe iz jednog medijuma u drugi?",
+    "odgovori": [
+      "Mijenja brzinu i pravac",
+      "Ne mijenja ništa",
+      "Mijenja frekvenciju",
+      "Prestaje da se širi"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 115,
+    "pitanje": "Koji se gas smatra idealnim u fizici?",
+    "odgovori": [
+      "Gas koji zadovoljava gasne zakone i nema međumolekularne sile",
+      "Svaki gas na sobnoj temperaturi",
+      "Gas sa velikim pritiskom",
+      "Gas sa niskom temperaturom"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 116,
+    "pitanje": "Šta je definicija temperature u termodinamici?",
+    "odgovori": [
+      "Mjera prosječne kinetičke energije čestica",
+      "Ukupna energija sistema",
+      "Mjera volumena gasa",
+      "Mjera pritiska"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 117,
+    "pitanje": "Koji je osnovni uzrok radioaktivnog raspada?",
+    "odgovori": [
+      "Nestabilnost atomskog jezgra",
+      "Promjena temperature",
+      "Pritisak na jezgro",
+      "Kinetička energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 118,
+    "pitanje": "Koji je glavni izvor energije Sunca?",
+    "odgovori": [
+      "Termonuklearna fuzija",
+      "Nuklearna fisija",
+      "Hemijska reakcija sagorijevanja",
+      "Gravitaciona energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 119,
+    "pitanje": "Šta opisuje zakon očuvanja mehaničke energije?",
+    "odgovori": [
+      "Ukupna mehanička energija je konstantna ako ne djeluju spoljni  uticaji",
+      "Energija se stalno povećava",
+      "Energija se pretvara u masu",
+      "Energija se troši"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 120,
+    "pitanje": "Koja je jedinica za energiju u SI sistemu?",
+    "odgovori": [
+      "Joul (J)",
+      "Kalorija",
+      "Elektronvolt",
+      "Vat"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 121,
+    "pitanje": "Šta je moment sile?",
+    "odgovori": [
+      "Proizvod sile i kraka sile",
+      "Sila koja djeluje paralelno osi rotacije",
+      "Ukupna masa tijela",
+      "Ugao pod kojim djeluje sila"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 122,
+    "pitanje": "Kako se definiše ugaona brzina?",
+    "odgovori": [
+      "Promjena ugla po jedinici vremena",
+      "Brzina duž kružnice",
+      "Ugao u radijanima",
+      "Period rotacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 123,
+    "pitanje": "Koji je odnos između linearne i ugaone brzine kod kružnog kretanja?",
+    "odgovori": [
+      "v = ω r",
+      "v = r / ω",
+      "v = ω / r",
+      "v = r ω²"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 124,
+    "pitanje": "Šta je centripetalna sila?",
+    "odgovori": [
+      "Sila usmjerena prema centru kružnice",
+      "Sila usmjerena od centra kružnice",
+      "Sila trenja",
+      "Težina tijela"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 125,
+    "pitanje": "Kako se definiše moment inercije za tačkasto tijelo?",
+    "odgovori": [
+      "I = m r²",
+      "I = m r",
+      "I = m / r",
+      "I = m r³"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 126,
+    "pitanje": "Koji je osnovni princip zakona očuvanja impulsa?",
+    "odgovori": [
+      "Ukupni impuls u zatvorenom sistemu je konstantan",
+      "Impuls se povećava",
+      "Impuls se smanjuje",
+      "Impuls je uvijek nula"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 127,
+    "pitanje": "Koja je osnovna karakteristika elastičnih sudara?",
+    "odgovori": [
+      "Očuvanje kinetičke energije i ukupnog impulsa",
+      "Gubitak energije u obliku toplote",
+      "Promjena mase tijela",
+      "Nepostojanje kontakta tijela"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 128,
+    "pitanje": "Koji je osnovni princip hidrostatike?",
+    "odgovori": [
+      "Pritisak u fluidu raste sa dubinom",
+      "Pritisak je isti na svim visinama",
+      "Fluid je uvijek u pokretu",
+      "Pritisak ne zavisi od gustine fluida"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 129,
+    "pitanje": "Kako se definiše gustoća fluida?",
+    "odgovori": [
+      "Masa fluida po jedinici zapremine",
+      "Zapremina fluida po jedinici mase",
+      "Masa fluida po jedinici dužine",
+      "Pritisak fluida"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 130,
+    "pitanje": "Koji princip opisuje Arhimedova sila?",
+    "odgovori": [
+      "Sila potiska jednaka težini istisnute tečnosti",
+      "Sila trenja fluida",
+      "Pritisak fluida na dno posude",
+      "Normalna sila"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 131,
+    "pitanje": "Šta opisuje prvi zakon termodinamike?",
+    "odgovori": [
+      "Promjena unutrašnje energije jednaka je primljenoj toplini minus izvršenom radu",
+      "Unutrašnja energija je konstantna",
+      "Toplota ne može prelaziti sama od hladnog ka toplom",
+      "Energija se gubi u obliku zvuka"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 132,
+    "pitanje": "Koji je osnovni oblik gasnog zakona?",
+    "odgovori": [
+      "p V = n R T",
+      "p = F / A",
+      "E = ½ m v²",
+      "F = m a"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 133,
+    "pitanje": "Koja je jedinica za pritisak u SI sistemu?",
+    "odgovori": [
+      "Paskal (Pa)",
+      "Bar",
+      "Atmosfera (atm)",
+      "Njutn (N)"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 134,
+    "pitanje": "Koji gas se najčešće koristi kao radni fluid u termoelektranama?",
+    "odgovori": [
+      "Voda (para)",
+      "Azot",
+      "Kiseonik",
+      "Ugljen-dioksid"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 135,
+    "pitanje": "Koja je osnovna funkcija nuklearnog reaktora?",
+    "odgovori": [
+      "Kontrolisana nuklearna fisija za proizvodnju energije",
+      "Spajanje lakih jezgri",
+      "Proizvodnja hemikalija",
+      "Proizvodnja električne struje direktno"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 136,
+    "pitanje": "Šta je jonizujuće zračenje?",
+    "odgovori": [
+      "Zračenje koje može ukloniti elektrone iz atoma ili molekula",
+      "Nevidljivo svjetlo",
+      "Toplotno zračenje",
+      "Radio talasi"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 137,
+    "pitanje": "Kako se naziva količina materije u atomskoj jezgri?",
+    "odgovori": [
+      "Maseni broj",
+      "Atomski broj",
+      "Elektronski broj",
+      "Molekulska masa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 138,
+    "pitanje": "Šta je osnovni princip rada termometra?",
+    "odgovori": [
+      "Širenje ili skupljanje materijala sa promjenom temperature",
+      "Promjena boje",
+      "Emitovanje svjetlosti",
+      "Promjena mase"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 139,
+    "pitanje": "Kako se zove proces prelaska supstance iz čvrstog u gasovito stanje bez prolaska kroz tečno stanje?",
+    "odgovori": [
+      "Sublimacija",
+      "Kondenzacija",
+      "Isparavanje",
+      "Smrzavanje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 140,
+    "pitanje": "Koja je osnovna karakteristika idealnog gasa?",
+    "odgovori": [
+      "Ne postoji međumolekularna sila i sudari su savršeno elastični",
+      "Postoji jaka međumolekularna sila",
+      "Gas je u tečnom stanju",
+      "Gas se ne širi"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 141,
+    "pitanje": "Šta opisuje Bernulijevu jednačinu u fluidima?",
+    "odgovori": [
+      "Zavisnost pritiska, brzine i visine fluida u toku strujanja",
+      "Zakon očuvanja mase",
+      "Zakon gravitacije",
+      "Zakone termodinamike"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 142,
+    "pitanje": "Kako se zove energija koju tijelo posjeduje zbog svog kretanja?",
+    "odgovori": [
+      "Kinetička energija",
+      "Potencijalna energija",
+      "Unutrašnja energija",
+      "Toplotna energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 143,
+    "pitanje": "Koji oblik talasa ima pravac oscilacije paralelan sa pravcem širenja talasa?",
+    "odgovori": [
+      "Longitudinalni talas",
+      "Transverzalni talas",
+      "Elektromagnetni talas",
+      "Gravitacioni talas"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 144,
+    "pitanje": "Šta je amortizacija u oscilacionim sistemima?",
+    "odgovori": [
+      "Smanjenje amplitude oscilacija usljed otpora",
+      "Povećanje frekvencije oscilacija",
+      "Nepromenjena energija sistema",
+      "Uvećanje mase tijela"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 145,
+    "pitanje": "Koji je princip rada nuklearnog termalnog reaktora?",
+    "odgovori": [
+      "Korištenje neutrona sporih brzina za izazivanje fisije",
+      "Koristeći električne impulse za fuziju",
+      "Hlađenje visokotemperaturnih plinova",
+      "Emitovanje gama zračenja"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 146,
+    "pitanje": "Šta je osnovni uzrok gubitka energije u elastičnim sudarima?",
+    "odgovori": [
+      "Elastični sudari nemaju gubitak energije",
+      "Pretvaranje energije u zvuk",
+      "Pretvaranje energije u toplotu",
+      "Promjena mase tijela"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 147,
+    "pitanje": "Kako se naziva proces prelaska tečnosti u gasovito stanje?",
+    "odgovori": [
+      "Isparavanje",
+      "Sublimacija",
+      "Kondenzacija",
+      "Smrzavanje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 148,
+    "pitanje": "U kojem gasu je najveća brzina zvuka na sobnoj temperaturi?",
+    "odgovori": [
+      "Vodik",
+      "Ugljen-dioksid",
+      "Kiseonik",
+      "Azot"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 149,
+    "pitanje": "Koja je osnovna formula za impuls sile?",
+    "odgovori": [
+      "I = F Δt",
+      "I = m v",
+      "I = m a",
+      "I = F / t"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 150,
+    "pitanje": "Šta predstavlja defekt mase u nuklearnoj fizici?",
+    "odgovori": [
+      "Razlika između mase jezgra i zbir masa protona i neutrona",
+      "Masa elektrona u atomu",
+      "Masa atoma sa svim elektronima",
+      "Masa pojedinačnog protona"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 151,
+    "pitanje": "Kako se definiše frekvencija oscilacija?",
+    "odgovori": [
+      "Broj oscilacija u jedinici vremena",
+      "Vrijeme trajanja oscilacije",
+      "Maksimalno pomjeranje oscilacija",
+      "Dužina talasa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 152,
+    "pitanje": "Koja sila djeluje suprotno od smjera kretanja tijela po površini?",
+    "odgovori": [
+      "Sila trenja",
+      "Težina",
+      "Normalna sila",
+      "Gravitaciona sila"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 153,
+    "pitanje": "Koja je osnovna jedinica električne struje u SI sistemu?",
+    "odgovori": [
+      "Amper (A)",
+      "Volt (V)",
+      "Om (Ω)",
+      "Kulon (C)"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 154,
+    "pitanje": "Koji princip se koristi u mjerenju visine pomoću barometra?",
+    "odgovori": [
+      "Promjena pritiska vazduha sa visinom",
+      "Promjena temperature sa visinom",
+      "Promjena brzine zvuka sa visinom",
+      "Promjena gustine vode"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 155,
+    "pitanje": "Šta je to toplinski kapacitet tijela?",
+    "odgovori": [
+      "Količina toplote potrebna da se tijelo zagrije za 1 stepen",
+      "Ukupna toplota tijela",
+      "Temperatura tijela",
+      "Količina energije po jedinici mase"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 156,
+    "pitanje": "Koji je osnovni princip rada termodinamičkog motora?",
+    "odgovori": [
+      "Pretvaranje toplote u mehanički rad",
+      "Pretvaranje električne energije u toplotu",
+      "Hlađenje fluida",
+      "Emitovanje zračenja"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 157,
+    "pitanje": "Kako se naziva sila koja djeluje između molekula u tečnosti?",
+    "odgovori": [
+      "Koheziona sila",
+      "Gravitaciona sila",
+      "Elektromagnetna sila",
+      "Sila trenja"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 158,
+    "pitanje": "Šta je radioaktivni raspad?",
+    "odgovori": [
+      "Spontano emitovanje čestica ili zračenja iz nestabilnog jezgra",
+      "Spajanje dva atoma",
+      "Hemijska reakcija",
+      "Fizikalna promjena temperature"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 159,
+    "pitanje": "Koja čestica se emituje u alfa raspadu?",
+    "odgovori": [
+      "Helijumovo jezgro (2 protona i 2 neutrona)",
+      "Elektron",
+      "Pozitron",
+      "Neutron"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 160,
+    "pitanje": "Kako se naziva uređaj koji mjeri intenzitet zračenja?",
+    "odgovori": [
+      "Geiger-Milerov brojač",
+      "Barometar",
+      "Termometar",
+      "Voltmeter"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 161,
+    "pitanje": "Šta predstavlja harmonijsko oscilovanje?",
+    "odgovori": [
+      "Oscilacije kod kojih je povratna sila proporcionalna pomjeraju",
+      "Oscilacije sa konstantnom frekvencijom bez pomjeranja",
+      "Složene oscilacije sa promjenjivom amplitudom",
+      "Nelinearne oscilacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 162,
+    "pitanje": "Kako se definiše amplitude kod oscilacija?",
+    "odgovori": [
+      "Najveće pomjeranje od ravnotežnog položaja",
+      "Vrijeme trajanja jedne oscilacije",
+      "Broj oscilacija u jedinici vremena",
+      "Frekvencija oscilacija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 163,
+    "pitanje": "Koji talas ima veći pritisak: zvučni talas visokog ili niskog intenziteta?",
+    "odgovori": [
+      "Zvučni talas visokog intenziteta",
+      "Zvučni talas niskog intenziteta",
+      "Oba imaju isti pritisak",
+      "Zavisno od frekvencije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 164,
+    "pitanje": "Šta se dešava sa frekvencijom zvučnog talasa kada se izvor približava posmatraču (Doplerov efekat)?",
+    "odgovori": [
+      "Frekvencija raste",
+      "Frekvencija opada",
+      "Frekvencija ostaje ista",
+      "Frekvencija postaje nula"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 165,
+    "pitanje": "Koji zakon opisuje vezu između pritiska i zapremine idealnog gasa pri konstantnoj temperaturi?",
+    "odgovori": [
+      "Boyle-Mariottov zakon",
+      "Gay-Lussacov zakon",
+      "Charlesov zakon",
+      "Avogadrov zakon"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 166,
+    "pitanje": "Koja je osnovna razlika između fisije i fuzije nuklearnih jezgara?",
+    "odgovori": [
+      "Fisija je raspad težeg jezgra, fuzija je spajanje lakših jezgara",
+      "Fisija je spajanje jezgara, fuzija je raspad",
+      "Obje su oblici hemijske reakcije",
+      "Nema razlike"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 167,
+    "pitanje": "Koji tip energije se oslobađa tokom nuklearne fisije?",
+    "odgovori": [
+      "Nuklearna energija",
+      "Hemijska energija",
+      "Potencijalna energija",
+      "Kinetička energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 168,
+    "pitanje": "Koji je zakon odgovoran za očuvanje ukupne energije u izolovanom sistemu?",
+    "odgovori": [
+      "Prvi zakon termodinamike",
+      "Drugi zakon termodinamike",
+      "Zakon gravitacije",
+      "Zakon očuvanja impulsa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 169,
+    "pitanje": "Kako se naziva energija koju tijelo ima zbog svoje visine u gravitacionom polju?",
+    "odgovori": [
+      "Potencijalna energija",
+      "Kinetička energija",
+      "Unutrašnja energija",
+      "Toplotna energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 170,
+    "pitanje": "Koji je osnovni princip zakona očuvanja energije?",
+    "odgovori": [
+      "Energija se ne može stvoriti ni uništiti, već samo pretvoriti iz jednog u drugi oblik",
+      "Energija se stalno povećava",
+      "Energija se gubi tokom kretanja",
+      "Energija može nastati iz ničega"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 171,
+    "pitanje": "Šta označava pojam 'radioaktivnost'?",
+    "odgovori": [
+      "Spontano emitovanje čestica ili zračenja iz nestabilnog jezgra",
+      "Hemijska reakcija u atomu",
+      "Stanje mirovanja atoma",
+      "Elektromagnetsko zračenje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 172,
+    "pitanje": "Koji tip talasa se prostire kroz vakum?",
+    "odgovori": [
+      "Elektromagnetni talasi",
+      "Zvučni talasi",
+      "Longitudinalni talasi",
+      "Transverzalni talasi u čvrstim tijelima"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 173,
+    "pitanje": "Šta je Doplerov efekt?",
+    "odgovori": [
+      "Promjena frekvencije talasa usljed kretanja izvora ili posmatrača",
+      "Povećanje amplitude talasa",
+      "Smanjenje brzine talasa",
+      "Propagacija talasa kroz medij"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 174,
+    "pitanje": "Kako se definiše unutrašnja energija sistema?",
+    "odgovori": [
+      "Zbir kinetičke i potencijalne energije svih čestica sistema",
+      "Samo kinetička energija čestica",
+      "Samo potencijalna energija čestica",
+      "Toplotni kapacitet sistema"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 175,
+    "pitanje": "Koji je osnovni cilj termodinamike?",
+    "odgovori": [
+      "Proučavanje prenosa toplote i rada u sistemima",
+      "Mjerenje temperature",
+      "Izrada termometra",
+      "Definisanje pritiska"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 176,
+    "pitanje": "Koji proces u termodinamici se naziva izotermni?",
+    "odgovori": [
+      "Proces pri konstantnoj temperaturi",
+      "Proces pri konstantnom pritisku",
+      "Proces pri konstantnoj zapremini",
+      "Proces pri konstantnoj masi"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 177,
+    "pitanje": "Šta je rezonanca u oscilacionim sistemima?",
+    "odgovori": [
+      "Pojava velikog pojačanja amplitude kod određenih frekvencija",
+      "Potpuno gašenje oscilacija",
+      "Nepromenjena amplituda oscilacija",
+      "Povećanje frekvencije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 178,
+    "pitanje": "Koja je funkcija kontrolnih šipki u nuklearnom reaktoru?",
+    "odgovori": [
+      "Regulacija brzine fisije upijanjem neutrona",
+      "Emitovanje neutrona",
+      "Hlađenje reaktora",
+      "Produkcija energije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 179,
+    "pitanje": "Koji proces se dešava tokom nuklearne fuzije?",
+    "odgovori": [
+      "Spajanje lakih jezgara u teža jezgra",
+      "Raspad jezgra na manje djelove",
+      "Emitovanje alfa čestica",
+      "Spontano zračenje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 180,
+    "pitanje": "Šta je kinetička energija fluida u Bernulijevoj jednačini?",
+    "odgovori": [
+      "Energetski doprinos brzine strujanja fluida",
+      "Energija usljed pritiska fluida",
+      "Potencijalna energija fluida",
+      "Toplotna energija fluida"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 181,
+    "pitanje": "Kako se zove pojava kada se zvučni talas odbija od prepreke?",
+    "odgovori": [
+      "Refleksija",
+      "Refrakcija",
+      "Difrakcija",
+      "Interferencija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 182,
+    "pitanje": "Šta predstavlja brzina zvuka u vazduhu na sobnoj temperaturi?",
+    "odgovori": [
+      "Otprilike 343 m/s",
+      "Otprilike 1500 m/s",
+      "Otprilike 30 m/s",
+      "Otprilike 1000 m/s"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 183,
+    "pitanje": "Koji od navedenih je primarni nosilac termalne energije u idealnom gasu?",
+    "odgovori": [
+      "Kinetička energija molekula",
+      "Potencijalna energija molekula",
+      "Električna energija",
+      "Hemijska energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 184,
+    "pitanje": "Kako se naziva količina materije u atomskoj fizici?",
+    "odgovori": [
+      "Maseni broj",
+      "Atomska masa",
+      "Broj protona",
+      "Broj neutrona"
+    ],
+    "tacan": 1
+  },
+  {
+    "id": 185,
+    "pitanje": "Koja čestica je odgovorna za pozitivni naboj u atomu?",
+    "odgovori": [
+      "Proton",
+      "Neutron",
+      "Elektron",
+      "Fotonska čestica"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 186,
+    "pitanje": "Šta je nuklearna fisija?",
+    "odgovori": [
+      "Raspad teškog jezgra na lakša jezgra",
+      "Spajanje lakih jezgara u teža jezgra",
+      "Emitovanje elektromagnetnog zračenja",
+      "Pretvaranje neutrona u proton"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 187,
+    "pitanje": "Koji je zakon osnov za rad hidrauličnih sistema?",
+    "odgovori": [
+      "Pascalov zakon",
+      "Archimedesov zakon",
+      "Boyle-Mariottov zakon",
+      "Zakon očuvanja impulsa"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 188,
+    "pitanje": "Kako se zove proces u kojem se molekuli gasova sudaraju i razmjenjuju energiju bez gubitka ukupne energije?",
+    "odgovori": [
+      "Elastični sudari",
+      "Neelastični sudari",
+      "Raspad molekula",
+      "Ionizacija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 189,
+    "pitanje": "Šta je uslov za pojavu stacionarnog talasa na žici?",
+    "odgovori": [
+      "Interferencija dva talasa jednake amplitude i frekvencije koji se kreću u suprotnim smjerovima",
+      "Talasi različite frekvencije",
+      "Talasi koji se kreću istim smjerom",
+      "Ne postoji uslov za stacionarni talas"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 190,
+    "pitanje": "Koji parametar opisuje brzinu rotacionog kretanja tijela?",
+    "odgovori": [
+      "Ugaona brzina",
+      "Linearni impuls",
+      "Akceleracija",
+      "Radijus rotacije"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 191,
+    "pitanje": "Koji je osnovni princip zakona očuvanja impulsa?",
+    "odgovori": [
+      "Ukupni impuls zatvorenog sistema ostaje konstantan ako na sistem ne djeluju spoljne sile",
+      "Impuls se stalno povećava",
+      "Impuls zavisi samo od mase tijela",
+      "Impuls se gubi tokom sudara"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 192,
+    "pitanje": "Koja veličina je mjerilo rotacionog momenta tijela?",
+    "odgovori": [
+      "Moment impulsa (angularni impuls)",
+      "Moment sile",
+      "Ugaona brzina",
+      "Ugaona akceleracija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 193,
+    "pitanje": "Koji oblik energije se ne može direktno pretvoriti u mehaničku energiju?",
+    "odgovori": [
+      "Toplotna energija u izolovanom sistemu",
+      "Kinetička energija",
+      "Potencijalna energija",
+      "Električna energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 194,
+    "pitanje": "Šta se dešava sa kinetičkom energijom tijela u idealno elastičnom sudaru?",
+    "odgovori": [
+      "Ukupna kinetička energija ostaje nepromijenjena",
+      "Kinetička energija se gubi u toplinu",
+      "Kinetička energija se povećava",
+      "Kinetička energija postaje nula"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 195,
+    "pitanje": "Kako se naziva sila kojom fluid djeluje na površinu u statičkom stanju?",
+    "odgovori": [
+      "Pritisak",
+      "Napon",
+      "Gravitaciona sila",
+      "Trenje"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 196,
+    "pitanje": "Koji je osnovni princip Bernulijeve jednačine?",
+    "odgovori": [
+      "Zbir kinetičke, potencijalne i energije pritiska fluida je konstantan duž strujnice",
+      "Pritisak se povećava sa brzinom fluida",
+      "Brzina fluida je konstantna u svim dijelovima",
+      "Potencijalna energija fluida je uvijek veća od kinetičke"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 197,
+    "pitanje": "Kako se zove količina toplote potrebna da se jedinica mase supstance zagrije za 1 stepen Celzijusa?",
+    "odgovori": [
+      "Specifični toplotni kapacitet",
+      "Toplotna provodljivost",
+      "Toplotni tok",
+      "Unutrašnja energija"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 198,
+    "pitanje": "Koja je osnovna funkcija nuklearnih kontrolnih šipki u reaktoru?",
+    "odgovori": [
+      "Apsorpcija neutrona radi kontrole reakcije fisije",
+      "Emitovanje neutrona za iniciranje reakcije",
+      "Proizvodnja toplote",
+      "Hlađenje reaktora"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 199,
+    "pitanje": "Koji je osnovni princip rada termometra?",
+    "odgovori": [
+      "Proširenje supstance sa porastom temperature",
+      "Smanjenje zapremine sa porastom temperature",
+      "Promjena boje sa temperaturom",
+      "Emitovanje toplote"
+    ],
+    "tacan": 0
+  },
+  {
+    "id": 200,
+    "pitanje": "Koji je osnovni razlog zbog kojeg se vrši hlađenje nuklearnih reaktora?",
+    "odgovori": [
+      "Uklanjanje viška toplote nastale u fisiji",
+      "Povećanje brzine fisije",
+      "Proizvodnja energije",
+      "Stvaranje neutrona"
+    ],
+    "tacan": 0
+  }
+];
+
+let currentTestIndex = 0;
+const testSize = 20;
+let correctCount = 0;
+let incorrectCount = 0;
+let currentQuestionIndex = 0;
+
+function loadQuestion() {
+  const start = currentTestIndex * testSize;
+  const questionData = pitanja[start + currentQuestionIndex];
+  
+  document.getElementById('question').innerText = questionData.pitanje;
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+  
+  // Kombinujemo odgovore sa njihovim originalnim indeksima
+let shuffledAnswers = questionData.odgovori.map((odg, i) => ({ text: odg, index: i }));
+
+// Nasumično ih promiješamo
+shuffledAnswers.sort(() => Math.random() - 0.5);
+
+// Prikazujemo dugmad i čuvamo originalni indeks radi provjere tačnosti
+shuffledAnswers.forEach(ans => {
+  const btn = document.createElement('button');
+  btn.innerText = ans.text;
+  btn.classList.add('answer');
+  btn.onclick = () => checkAnswer(ans.index);
+  answersDiv.appendChild(btn);
+});
+
+  document.getElementById('feedback').innerText = '';
+  document.getElementById('next-btn').disabled = true;
+  document.getElementById('current-question').innerText = currentQuestionIndex + 1;
+  document.getElementById('current-test').innerText = currentTestIndex + 1;
+}
+
+function checkAnswer(selected) {
+  const start = currentTestIndex * testSize;
+  const questionData = pitanja[start + currentQuestionIndex];
+  
+  const isCorrect = (selected === questionData.tacan);
+  if (isCorrect) {
+    correctCount++;
+    document.getElementById('feedback').innerText = "Tačno!";
+    document.getElementById('feedback').className = 'correct';
+  } else {
+    incorrectCount++;
+    document.getElementById('feedback').innerText = "Netačno!";
+    document.getElementById('feedback').className = 'incorrect';
+  }
+  
+  updateSidebar();
+  disableAnswers();
+  document.getElementById('next-btn').disabled = false;
+}
+
+function disableAnswers() {
+  const buttons = document.querySelectorAll('#answers button');
+  buttons.forEach(btn => btn.disabled = true);
+}
+
+function updateSidebar() {
+  document.getElementById('correct-count').innerText = correctCount;
+  document.getElementById('incorrect-count').innerText = incorrectCount;
+}
+
+document.getElementById('next-btn').onclick = () => {
+  currentQuestionIndex++;
+  if (currentQuestionIndex >= testSize) {
+    alert(`Test ${currentTestIndex + 1} završen!\nTačno: ${correctCount}, Netačno: ${incorrectCount}`);
+    currentTestIndex++;
+    currentQuestionIndex = 0;
+    correctCount = 0;
+    incorrectCount = 0;
+    
+    if(currentTestIndex >= 10){
+      alert("Čestitamo! Završili ste sve testove.");
+      // Ovde možeš dodati restart kviza ako želiš
+      currentTestIndex = 0;
+      loadQuestion();
+      updateSidebar();
+      return;
+    }
+  }
+  loadQuestion();
+  updateSidebar();
+}
+
+loadQuestion();
+updateSidebar();
+
+</script>
+
 </body>
 </html>
